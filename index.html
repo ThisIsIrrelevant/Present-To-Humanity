@@ -1,0 +1,122 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A Present to Humanity: Exploring revolutionary scientific theories in physics, biology, AI, and more.">
+  <meta name="keywords" content="science, revolutionary theories, physics, biology, cosmology, artificial intelligence">
+  <meta name="author" content="A Present to Humanity">
+  <title>A Present to Humanity</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Navigation -->
+  <nav class="bg-blue-900 text-white py-4">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">A Present to Humanity</h1>
+      <ul class="flex space-x-4">
+        <li><a href="index.html" class="hover:underline" aria-label="Home page">Home</a></li>
+        <li><a href="about.html" class="hover:underline" aria-label="About page">About</a></li>
+        <li><a href="license.html" class="hover:underline" aria-label="License page">License</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="bg-blue-900 text-white py-6">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl font-bold">A Present to Humanity</h1>
+      <p class="mt-2 text-lg">Exploring revolutionary theories for the future of science</p>
+    </div>
+  </header>
+
+  <!-- Introduction -->
+  <section class="container mx-auto px-4 py-10">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold mb-4">Welcome to A Present to Humanity</h2>
+      <p class="text-gray-700 leading-relaxed">
+        This blog is dedicated to sharing groundbreaking ideas and theories across scientific fields, from physics to biology, artificial intelligence to cosmology. Each article is a present to humanity, inviting you to think beyond the boundaries of the known. Last updated: August 07, 2025, 10:19 PM CEST.
+      </p>
+    </div>
+  </section>
+
+  <!-- Articles Section -->
+  <section class="container mx-auto px-4 py-10">
+    <h2 class="text-3xl font-semibold mb-6">Recent Articles</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Sample Article -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-2">A New Theory on Quantum Gravity</h3>
+        <p class="text-gray-600 mb-4 short-desc">Exploring a hypothesis that bridges general relativity and quantum mechanics in a revolutionary framework.</p>
+        <p class="text-gray-600 mb-4 hidden long-desc">This theory proposes a novel approach to unifying quantum mechanics and general relativity by introducing a new framework based on emergent spacetime. It challenges traditional assumptions and offers potential experimental tests.</p>
+        <button class="text-blue-600 hover:underline toggle-desc" aria-label="Toggle article description">Read More</button>
+        <a href="articles/quantum-gravity.html" class="text-blue-600 hover:underline ml-4">Full Article</a>
+      </div>
+      <!-- Add more articles here -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-blue-900 text-white py-6">
+    <div class="container mx-auto px-4 text-center">
+      <p>&copy; 2025 A Present to Humanity. Content licensed under <a href="https://creativecommons.org/licenses/by/4.0/" class="underline" target="_blank" rel="noopener" aria-label="Creative Commons Attribution 4.0 License">CC BY 4.0</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Toggle article description
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleButtons = document.querySelectorAll('.toggle-desc');
+      toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const shortDesc = button.previousElementSibling.previousElementSibling;
+          const longDesc = button.previousElementSibling;
+          shortDesc.classList.toggle('hidden');
+          longDesc.classList.toggle('hidden');
+          button.textContent = shortDesc.classList.contains('hidden') ? 'Show Less' : 'Read More';
+        });
+      });
+      console.log('A Present to Humanity is online!');
+    });
+  </script>
+</body>
+</html>
