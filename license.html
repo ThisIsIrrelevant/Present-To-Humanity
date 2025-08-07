@@ -1,0 +1,92 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="License information for A Present to Humanity blog content.">
+  <meta name="keywords" content="license, Creative Commons, CC BY 4.0">
+  <meta name="author" content="A Present to Humanity">
+  <title>License | A Present to Humanity</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Navigation -->
+  <nav class="bg-blue-900 text-white py-4">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">A Present to Humanity</h1>
+      <ul class="flex space-x-4">
+        <li><a href="../index.html" class="hover:underline" aria-label="Home page">Home</a></li>
+        <li><a href="about.html" class="hover:underline" aria-label="About page">About</a></li>
+        <li><a href="license.html" class="hover:underline" aria-label="License page">License</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- License Content -->
+  <section class="container mx-auto px-4 py-10">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-3xl font-bold mb-4">License</h1>
+      <p class="text-gray-700 mb-4">
+        All content on <strong>A Present to Humanity</strong> is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/" class="text-blue-600 underline" target="_blank" rel="noopener" aria-label="Creative Commons Attribution 4.0 License">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>.
+      </p>
+      <p class="text-gray-700 mb-4">
+        This means you are free to share (copy and redistribute) and adapt (remix, transform, and build upon) the material for any purpose, even commercially, as long as you:
+        <ul class="list-disc pl-6">
+          <li>Give appropriate credit to the original author (A Present to Humanity).</li>
+          <li>Provide a link to the license.</li>
+          <li>Indicate if changes were made.</li>
+        </ul>
+      </p>
+      <p class="text-gray-700">
+        For more details, visit the <a href="https://creativecommons.org/licenses/by/4.0/" class="text-blue-600 underline" target="_blank" rel="noopener">Creative Commons website</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-blue-900 text-white py-6">
+    <div class="container mx-auto px-4 text-center">
+      <p>&copy; 2025 A Present to Humanity. Content licensed under <a href="https://creativecommons.org/licenses/by/4.0/" class="underline" target="_blank" rel="noopener" aria-label="Creative Commons Attribution 4.0 License">CC BY 4.0</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>
